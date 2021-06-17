@@ -4,7 +4,12 @@ import time
 class SoftwareSerial:
 
     def __init__(self, baudrate, txPin, rxPin):
-
+        """
+        This
+        :param baudrate: The baud rate of the serial communication device
+        :param txPin: GPIO pin connected to the
+        :param rxPin:
+        """
         self.baudrate = baudrate
         self.txPin = txPin
         self.rxPin = rxPin
@@ -84,12 +89,38 @@ class SoftwareSerial:
 
         return data_string
 
+    def test_connection(self, timeout=0.5, verbose=True):
+
+        self.write("AT")
+        ret_val = self.readString(timeout=timeout, verbose=verbose)
+
+        if "OK".upper() in ret_val:
+            return True
+        else:
+            if verbose: print(f"Return Data :: {ret_val}")
+            return False
+
+
 if __name__ == '__main__':
 
     ser = SoftwareSerial(baudrate=9600, txPin=26, rxPin=19)
-    ser.write("AT")
-    dat = ser.readString(verbose=False)
-    print(dat)
+    #ser = SoftwareSerial(baudrate=9600, txPin=20, rxPin=21)
+    #ser = SoftwareSerial(baudrate=9600, txPin=16, rxPin=12)
+    #ser = SoftwareSerial(baudrate=9600, txPin=24, rxPin=23)
+    
+    ret = ser.test_connection()
+    ser.write("AT+CCFC=?")
+    dat = ser.readString(verbose=False, timeout=1); print(dat)
+
+    # ser.write("AT+CMGS=\"+254723410282\"")
+    # dat = ser.readString(verbose=False, timeout=1); print(dat)
+
+    # ser.write("TEst v4")
+    # dat = ser.readString(verbose=True, timeout=1); print(dat)
+    
+    # ser.write("\x1A")
+    # dat = ser.readString(verbose=True, timeout=5); print(dat)
+    # # print(dat)
 
 
 
