@@ -75,7 +75,10 @@ class SoftwareSerial:
                 try:
                     data_s = data.decode("utf-8", "ignore")
                     data_string += data_s
-                    if verbose: print(data_s, end="")
+                    if data_s == "\n":
+                        print(f"Data String {data_string}")
+                        data_string = ''
+                    # if verbose: print(data_s, end="")
 
                 except Exception as e:
                     if verbose: print(f"Could not decode string: {e}")
@@ -83,9 +86,11 @@ class SoftwareSerial:
                 # print("outide!")
                 start_time = time.time_ns()
 
-            if (time.time_ns() - start_time) >= (timeout*1e9):
-                if verbose: print(f"Breaking.., Time :: {time.time_ns() - start_time} ns, DATA LIST:: {data_string}")
-                break
+            if timeout != -1:
+
+                if (time.time_ns() - start_time) >= (timeout*1e9):
+                    if verbose: print(f"Breaking.., Time :: {time.time_ns() - start_time} ns, DATA LIST:: {data_string}")
+                    break
 
         return data_string
 
@@ -101,6 +106,8 @@ class SoftwareSerial:
             return False
 
 
+
+
 if __name__ == '__main__':
 
     ser = SoftwareSerial(baudrate=9600, txPin=26, rxPin=19)
@@ -109,7 +116,7 @@ if __name__ == '__main__':
     #ser = SoftwareSerial(baudrate=9600, txPin=24, rxPin=23)
     
     ret = ser.test_connection()
-    ser.write("AT+CCFC=?")
+    ser.write("AT+CSPN?")
     dat = ser.readString(verbose=False, timeout=1); print(dat)
 
     # ser.write("AT+CMGS=\"+254723410282\"")
