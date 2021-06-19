@@ -31,65 +31,22 @@ def setListen(serialsList):
         dat = serObj.readString(verbose=True, timeout=0.25); print(dat)
 
 
-def readSMSString(serial_obj):
+def readSMSString(serial_obj: SoftwareSerial):
     
     print(f"Listennig for sms on port {serial_obj}")
     
     def reader():
         
-        wait_next = False
-        verbose = True
-        
-        pigpio.exceptions = False
-        serial_obj.pi.bb_serial_read_close(serial_obj.rxPin)
-        # fatal exceptions back on
-        pigpio.exceptions = True
-        serial_obj.pi.bb_serial_read_open(serial_obj.rxPin, serial_obj.baudrate)  # open the port, 8 bits is default
-
-        data_string = ''
-        phone_number = ''
-        message_date = ''
-        actual_message = ''
-
         while True:
+            
+            real_data = serial_obj.readSMS(timeout=1, verbose=False)
 
-            (b_count, data) = serial_obj.pi.bb_serial_read(serial_obj.rxPin)
+            if len(real_data) > 0:
+                print(f"real_data == {real_data}")
 
-            if data:
-                print(data)
-                wait_next = True
-                ## Try decoding the data
-                try:
-                    data_s = data.decode("utf-8", "ignore")
-                    data_string += data_s
-                    if data_s == "\n":
-                        # print(f"wait_next val :: {wait_next}")
-                        # print(f"Data String {data_string}")
-                        if "+CMT" in data_string:
-                            print(f"MESSAGE INFO: {data_string}")
-                            phone_number = data_string.split("\"")[1]
-                            message_date = data_string.split("\"")[5]
-                            wait_next = False
-                        
-                        if wait_next:
-                            print(f"MESSAGE: {data_string}")
-                            actual_message = data_string
-                            wait_next = False
-                        
-                        if (phone_number.strip() != '' and actual_message.strip() != ''):
-                            print(f"SEND MESSAGE :: message - {actual_message}, phone_to - {phone_number}")
-                            
-                            
-                        data_string = ''
-                        phone_number = ''
-                        message_date = ''
-                        actual_message = ''
-                        
-                    # if verbose: print(data_s, end="")
-
-                except Exception as e:
-                    if verbose: print(f"Could not decode string: {e}")
-                    break
+                # except Exception as e:
+                #     if verbose: print(f"Could not decode string: {e}")
+                #     break
                 # print("outide!")
 
     threading.Thread(target=reader).start()

@@ -94,6 +94,46 @@ class SoftwareSerial:
 
         return data_string
 
+    def readSMS(self, timeout=2, verbose=True):
+
+        pigpio.exceptions = False
+        self.pi.bb_serial_read_close(self.rxPin)
+        # fatal exceptions back on
+        pigpio.exceptions = True
+        self.pi.bb_serial_read_open(self.rxPin, self.baudrate)  # open the port, 8 bits is default
+
+        data_string = ''
+
+        start_time = time.time_ns()
+        while True:
+
+            (b_count, data) = self.pi.bb_serial_read(self.rxPin)
+
+            if data:
+
+                ## Try decoding the data
+                try:
+                    data_s = data.decode("utf-8", "ignore")
+                    data_string += data_s
+                    # if data_s == "\n":
+                    #     print(f"Data String {data_string}")
+                    #     data_string = ''
+                    # if verbose: print(data_s, end="")
+
+                except Exception as e:
+                    if verbose: print(f"Could not decode string: {e}")
+                    break
+                # print("outide!")
+                start_time = time.time_ns()
+
+            if (time.time_ns() - start_time) >= (timeout*1e9):
+                if verbose: print(f"Breaking.., Time :: {time.time_ns() - start_time} ns, DATA LIST:: {data_string}")
+                break
+
+        return data_string
+
+
+
     def test_connection(self, timeout=0.5, verbose=True):
 
         self.write("AT")
